@@ -2,12 +2,25 @@
 
 MyORMForPostgreSQL is a implementation of MyORM that uses PostgreSQL as database. 
 
+
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
+.NET CLI
 
 ```bash
-pip install foobar
+dotnet add package Adr.MyORM --version 1.0.0
+```
+
+Nuget package manager
+
+```bash
+PM> Install-Package Adr.MyORM -Version 1.0.0
+```
+
+packageReference
+
+```bash
+<PackageReference Include="Adr.MyORM" Version="1.0.0" />
 ```
 
 ## Usage
