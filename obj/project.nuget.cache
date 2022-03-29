@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "jubz09ZZWBjxa3wMkd5dm3h75abwF0DADDgN/pWmUn+VMqZA2P0GeXWVpOhzZckG1RoIZyLJA3de9ES9WCRrmA==",
+  "dgSpecHash": "IJd5gNYxkAn5R8eQIatL2xMhbIB1XryKdjh8RyyHqHfWWIi4yf1Q2ch1wibXCU61ANdm0BlUYpXGPtUp98e4Sw==",
   "success": true,
   "projectFilePath": "C:\\Users\\LuisDev\\Desktop\\MyORM\\MyORM\\MyORMForPostgreSQL\\MyORMForPostgreSQL.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\LuisDev\\.nuget\\packages\\adr.myorm\\1.0.1\\adr.myorm.1.0.1.nupkg.sha512",
     "C:\\Users\\LuisDev\\.nuget\\packages\\npgsql\\6.0.3\\npgsql.6.0.3.nupkg.sha512",
     "C:\\Users\\LuisDev\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
   ],

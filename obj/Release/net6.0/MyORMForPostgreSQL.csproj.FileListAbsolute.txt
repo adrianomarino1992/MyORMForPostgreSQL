@@ -1,0 +1,11 @@
+C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\bin\Release\net6.0\MyORMForPostgreSQL.deps.json
+C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\bin\Release\net6.0\MyORMForPostgreSQL.dll
+C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\bin\Release\net6.0\ref\MyORMForPostgreSQL.dll
+C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\bin\Release\net6.0\MyORMForPostgreSQL.pdb
+C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Release\net6.0\MyORMForPostgreSQL.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Release\net6.0\MyORMForPostgreSQL.AssemblyInfoInputs.cache
+C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Release\net6.0\MyORMForPostgreSQL.AssemblyInfo.cs
+C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Release\net6.0\MyORMForPostgreSQL.csproj.CoreCompileInputs.cache
+C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Release\net6.0\MyORMForPostgreSQL.dll
+C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Release\net6.0\ref\MyORMForPostgreSQL.dll
+C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Release\net6.0\MyORMForPostgreSQL.pdb

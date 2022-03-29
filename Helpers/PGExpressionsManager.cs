@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace MyORMForPostgreSQL.Helpers
 {
-    internal static class PGExpressionsManager
+    public static class PGExpressionsManager
     {
         public static IEnumerable<(ExpressionType?, Expression?)> SplitInBinaryExpressions(ExpressionType? type, Expression? expression)
         {
