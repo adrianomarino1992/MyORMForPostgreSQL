@@ -568,6 +568,20 @@ namespace MyORMForPostgreSQL.Objects
                     sql.Append(v == null ? "null" : $"$${v?.ToString()?.Trim()}$$");
                 }
 
+                if (c.PropertyType == typeof(bool))
+                {
+                    object? v = c.GetValue(obj);
+
+                    sql.Append(v == null ? "null" : $"{v?.ToString()?.Trim().ToLower()}");
+                }
+
+                if (c.PropertyType.IsEnum)
+                {
+                    object? v = (int)c.GetValue(obj);
+
+                    sql.Append(v == null ? "null" : $"{v?.ToString()?.Trim()}");
+                }
+
                 if (c.PropertyType == typeof(int) || c.PropertyType == typeof(long))
                 {
                     object? v = c.GetValue(obj);
@@ -634,6 +648,20 @@ namespace MyORMForPostgreSQL.Objects
                             if (u.GetType() == typeof(string))
                             {
                                 values.Append($" $${u?.ToString() ?? ""}$$  ");
+                            }
+
+                            if (u.GetType() == typeof(bool))
+                            {
+                                object? vd = u;
+
+                                sql.Append(vd == null ? "null" : $"{vd?.ToString()?.Trim().ToLower()}");
+                            }
+
+                            if (u.GetType().IsEnum)
+                            {
+                                object? vd = (int)u;
+
+                                sql.Append(vd == null ? "null" : $"{vd?.ToString()?.Trim()}");
                             }
 
                             if (u.GetType() == typeof(DateTime))

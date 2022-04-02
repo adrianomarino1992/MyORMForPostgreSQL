@@ -8,11 +8,19 @@
     ".NETCoreApp,Version=v6.0": {
       "MyORMForPostgreSQL/1.0.0": {
         "dependencies": {
-          "MyORM": "1.0.0",
+          "Adr.MyORM": "1.0.1",
           "Npgsql": "6.0.3"
         },
         "runtime": {
           "MyORMForPostgreSQL.dll": {}
+        }
+      },
+      "Adr.MyORM/1.0.1": {
+        "runtime": {
+          "lib/net6.0/MyORM.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
         }
       },
       "Npgsql/6.0.3": {
@@ -26,12 +34,7 @@
           }
         }
       },
-      "System.Runtime.CompilerServices.Unsafe/6.0.0": {},
-      "MyORM/1.0.0": {
-        "runtime": {
-          "MyORM.dll": {}
-        }
-      }
+      "System.Runtime.CompilerServices.Unsafe/6.0.0": {}
     }
   },
   "libraries": {
@@ -39,6 +42,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "Adr.MyORM/1.0.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-BYnZYOAq1c9xYZJjD+Nj1E4dDX+tzLdJFYps1bgSV3p+JBQ08Dnusw9KDYET/C4l9Ek0B2LnsnQZDyjl1stNSA==",
+      "path": "adr.myorm/1.0.1",
+      "hashPath": "adr.myorm.1.0.1.nupkg.sha512"
     },
     "Npgsql/6.0.3": {
       "type": "package",
@@ -53,11 +63,6 @@
       "sha512": "sha512-/iUeP3tq1S0XdNNoMz5C9twLSrM/TH+qElHkXWaPvuNOt+99G75NrV0OS2EqHx5wMN7popYjpc8oTjC1y16DLg==",
       "path": "system.runtime.compilerservices.unsafe/6.0.0",
       "hashPath": "system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
-    },
-    "MyORM/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
     }
   }
 }
