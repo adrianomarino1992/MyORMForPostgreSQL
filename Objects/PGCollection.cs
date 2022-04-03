@@ -76,20 +76,18 @@ namespace MyORMForPostgreSQL.Objects
 
         public IQueryableCollection<T> And<TResult>(Expression<Func<T, TResult>> expression)
         {
-            PGCollection<T> result = new PGCollection<T>(_pGManager, _context);
+            PGCollection<T> result = new PGCollection<T>(_pGManager, _context);           
 
-            Expression? expressios = expression.Body as BinaryExpression;
-
-            IEnumerable<(ExpressionType?, Expression?)> exs = SplitInBinaryExpressions(null, expressios);
+            IEnumerable<(ExpressionType?, Expression?)> exs = SplitInBinaryExpressions(null, expression.Body);
 
 
             if (_sql.Trim().Length > 0)
             {
-                _sql = $"WHERE ( {_sql.Replace("WHERE", "")} ) AND {ManageBinaryExpressions<T>(exs)} ";
+                _sql = $" WHERE ( {_sql.Replace("WHERE", "")} ) AND {ManageBinaryExpressions<T>(exs)} ";
             }
             else
             {
-                _sql = ManageBinaryExpressions<T>(exs);
+                _sql = $" WHERE {ManageBinaryExpressions<T>(exs)} ";
             }
 
             result._sql = _sql;
@@ -99,19 +97,17 @@ namespace MyORMForPostgreSQL.Objects
 
         public IQueryableCollection<T> Or<TResult>(Expression<Func<T, TResult>> expression)
         {
-            PGCollection<T> result = new PGCollection<T>(_pGManager, _context);
+            PGCollection<T> result = new PGCollection<T>(_pGManager, _context);            
 
-            Expression? expressios = expression.Body as BinaryExpression;
-
-            IEnumerable<(ExpressionType?, Expression?)> exs = SplitInBinaryExpressions(null, expressios);
+            IEnumerable<(ExpressionType?, Expression?)> exs = SplitInBinaryExpressions(null, expression.Body);
 
             if (_sql.Trim().Length > 0)
             {
-                _sql = $"WHERE ( {_sql.Replace("WHERE", "")} ) OR {ManageBinaryExpressions<T>(exs)} ";
+                _sql = $" WHERE ( {_sql.Replace("WHERE", "")} ) OR {ManageBinaryExpressions<T>(exs)} ";
             }
             else
             {
-                _sql = ManageBinaryExpressions<T>(exs);
+                _sql = $" WHERE {ManageBinaryExpressions<T>(exs)} ";
             }
 
             result._sql = _sql;
@@ -362,6 +358,32 @@ namespace MyORMForPostgreSQL.Objects
                         if (prop.PropertyType == typeof(int) && prop.SetMethod != null && int.TryParse(row[colName].ToString(), out int _out))
                         {
                             prop.SetValue(it, _out);
+                            continue;
+                        }
+                    }
+
+                    {
+                        if (prop.PropertyType == typeof(bool) && prop.SetMethod != null)
+                        {
+                            prop.SetValue(it, row[colName]);
+                            continue;
+                        }
+                    }
+
+                    {
+                        if (prop.PropertyType.IsEnum && prop.SetMethod != null)
+                        {
+
+                            foreach (var enums in Enum.GetValues(prop.PropertyType))
+                            {
+                                if ((int)enums == (int)row[colName])
+                                {
+                                    prop.SetValue(it, row[colName]);
+                                    goto END;
+                                }
+
+                            }
+                        END:
                             continue;
                         }
                     }
@@ -871,6 +893,21 @@ namespace MyORMForPostgreSQL.Objects
                 if (c.PropertyType == typeof(decimal) || c.PropertyType == typeof(float) || c.PropertyType == typeof(double))
                 {
                     object? v = c.GetValue(obj);
+
+                    sql.Append(v == null ? "null" : $"{v?.ToString()?.Trim()}");
+                }
+
+
+                if (c.PropertyType == typeof(bool))
+                {
+                    object? v = c.GetValue(obj);
+
+                    sql.Append(v == null ? "null" : $"{v?.ToString()?.Trim().ToLower()}");
+                }
+
+                if (c.PropertyType.IsEnum)
+                {
+                    object? v = (int)c.GetValue(obj);
 
                     sql.Append(v == null ? "null" : $"{v?.ToString()?.Trim()}");
                 }
