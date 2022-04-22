@@ -194,15 +194,7 @@ namespace MyORMForPostgreSQL.Objects
 
             string tableName = typeof(T).GetCustomAttribute<DBTableAttribute>()?.Name ?? typeof(T).Name.ToLower();
 
-            ExecuteNonQuery($"CREATE TABLE IF NOT EXISTS {PGConnectionBuilder.Schema}.{tableName}()");
-
-
-            IEnumerable<PropertyInfo> propertyInfos = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            foreach (PropertyInfo propertyInfo in propertyInfos)
-            {
-                CreateColumn(tableName, propertyInfo);
-            }
+            ExecuteNonQuery($"CREATE TABLE IF NOT EXISTS {PGConnectionBuilder.Schema}.{tableName}()");           
 
         }
 
