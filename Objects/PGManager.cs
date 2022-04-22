@@ -114,12 +114,12 @@ namespace MyORMForPostgreSQL.Objects
             }
         }
 
-        public (string, string) GetColumnNameAndType(PropertyInfo info)
+        public (string, string) GetColumnNameAndType(PropertyInfo info, bool checkKey = true)
         {
             string colName = info.GetCustomAttribute<DBColumnAttribute>()?.Name ?? info.Name.ToLower();
             bool key = info.GetCustomAttribute<DBPrimaryKeyAttribute>() != null;
 
-            if (key)
+            if (key && checkKey)
             {
                 if (info.PropertyType == typeof(Int32))
                     return (colName, " serial ");
@@ -242,11 +242,12 @@ namespace MyORMForPostgreSQL.Objects
             ExecuteNonQuery($"DROP TABLE IF EXISTS {tableName}");
         }
 
-        public void FitColumns(string table, IEnumerable<PropertyInfo> info)
+        public void FitColumns(string table, IEnumerable<PropertyInfo> infos)
         {
-            DataSet? dt = GetDataSet($"SELECT column_name FROM information_schema.columns WHERE table_catalog = '{PGConnectionBuilder.DataBase}' AND table_name = '{table}'");
+            DataSet? dt = GetDataSet($"SELECT column_name, data_type FROM information_schema.columns WHERE table_catalog = '{PGConnectionBuilder.DataBase}' AND table_name = '{table}'");
 
-            List<string?> columns = new List<string?>();
+            List<(string?, string?)> columns = new List<(string?, string?)>();
+            
 
             if (dt == null)
                 return;
@@ -256,18 +257,90 @@ namespace MyORMForPostgreSQL.Objects
 
             foreach (DataRow row in dt.Tables[0].Rows)
             {
-                columns.Add(row["column_name"].ToString());
+                columns.Add((row["column_name"].ToString(), row["data_type"].ToString()));
             }
 
-            foreach (string? col in columns)
+            foreach ((string? col, string? type) in columns)
             {
+                PropertyInfo? info = infos.FirstOrDefault(d => d.GetCustomAttribute<DBColumnAttribute>()?.Name == col || (d.GetCustomAttribute<DBColumnAttribute>() == null && col == d.Name.ToLower()));
                 if (col != null)
                 {
-                    if (!info.Any(d => d.GetCustomAttribute<DBColumnAttribute>()?.Name == col || (d.GetCustomAttribute<DBColumnAttribute>() == null && col == d.Name.ToLower())))
+                    if (info == null)
                     {
                         ExecuteNonQuery($"ALTER TABLE {PGConnectionBuilder.Schema}.{table} DROP COLUMN {col}");
+                        continue;
                     }
                 }
+                
+
+                if(info != null)
+                {
+                    bool isArray = info.PropertyType.IsAssignableTo(typeof(IEnumerable)) && info.PropertyType != typeof(string);
+
+                    string colType = String.Empty;
+
+
+                    if (isArray)
+                    {
+
+                        Type arrayType = info.PropertyType.GetElementType() ?? info.PropertyType.GetGenericArguments()[0];
+
+                        bool isValueType = (!arrayType.IsClass) || arrayType == typeof(string);
+
+                        if (isValueType)
+                        {
+                            try
+                            {
+                                colType = $"{GetDBTypeFromStruct(arrayType).Trim()}[]";
+
+                                if (colType.Trim().ToLower() != type?.Trim().ToLower())
+                                {
+                                    try
+                                    {
+                                        ExecuteNonQuery($"ALTER TABLE {PGConnectionBuilder.Schema}.{table} ALTER COLUMN {col} TYPE {colType}");
+                                    }
+                                    catch
+                                    {
+                                        ExecuteNonQuery($"ALTER TABLE {PGConnectionBuilder.Schema}.{table} DROP COLUMN {col}");
+                                        CreateColumn(table,info);
+
+                                    }
+                                    continue;
+                                }
+                                
+                            }
+                            catch
+                            {
+                                return;
+                            }                            
+                        }
+
+                    }
+                    else
+                    {
+                        (string _, colType) = GetColumnNameAndType(info, false);
+
+                        if (colType.Trim().ToLower() != type?.Trim().ToLower())
+                        {
+                            try
+                            {
+                                ExecuteNonQuery($"ALTER TABLE {PGConnectionBuilder.Schema}.{table} ALTER COLUMN {col} TYPE {colType}");
+
+                            }
+                            catch
+                            {
+                                ExecuteNonQuery($"ALTER TABLE {PGConnectionBuilder.Schema}.{table} DROP COLUMN {col}");
+                                CreateColumn(table, info);
+
+
+                            }
+                            continue;
+                        }
+
+                    }
+                }
+
+                
             }
 
         }

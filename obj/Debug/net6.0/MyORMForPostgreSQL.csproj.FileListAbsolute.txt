@@ -9,3 +9,4 @@ C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Debug\net6.0\MyORMFo
 C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Debug\net6.0\MyORMForPostgreSQL.dll
 C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Debug\net6.0\ref\MyORMForPostgreSQL.dll
 C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Debug\net6.0\MyORMForPostgreSQL.pdb
+C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Debug\net6.0\MyORMForPostgreSQL.csproj.AssemblyReference.cache
