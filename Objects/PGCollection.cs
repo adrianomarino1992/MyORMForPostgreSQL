@@ -10,6 +10,7 @@ using System.Data;
 using MyORM.Interfaces;
 using MyORM.Attributes;
 using MyORM.Exceptions;
+using MyORM;
 using static MyORMForPostgreSQL.Helpers.PGExpressionsManager;
 using System.Collections;
 
@@ -233,10 +234,27 @@ namespace MyORMForPostgreSQL.Objects
                 {
                     StringBuilder tQuery = new StringBuilder(sql);
 
+                    bool isArray = info.PropertyType.IsAssignableTo(typeof(IEnumerable)) && info.PropertyType != typeof(string);
+
+                    Type arrType = isArray ? (info.PropertyType.GetElementType() ?? info.PropertyType.GetGenericArguments()[0]) : info.PropertyType;
+
                     PropertyInfo? foreignKey = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
                                     .Where(d => d.GetCustomAttribute<DBIgnoreAttribute>() == null)
                                     .Where(d => d.PropertyType.IsValueType)
-                                    .Where(d => d.Name == $"{info.Name}Id").FirstOrDefault();
+                                    .Where(d => d.Name == $"{info.PropertyType.Name}Id").FirstOrDefault();
+
+                    PropertyInfo? primaryKey = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                    .Where(d => d.GetCustomAttribute<DBIgnoreAttribute>() == null)
+                                    .Where(d => d.PropertyType.IsValueType)
+                                    .Where(d => d.GetCustomAttribute<DBPrimaryKeyAttribute>() != null).FirstOrDefault();
+
+                    if (isArray)
+                    {
+                        foreignKey = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                    .Where(d => d.GetCustomAttribute<DBIgnoreAttribute>() == null)
+                                    .Where(d => d.PropertyType.IsValueType)
+                                    .Where(d => d.GetCustomAttribute<DBPrimaryKeyAttribute>() != null).FirstOrDefault();
+                    }
 
                     if (foreignKey == null)
                         continue;
@@ -273,15 +291,58 @@ namespace MyORMForPostgreSQL.Objects
                                   .FirstOrDefault();
 
 
-
                     foreach (T rO in ts)
                     {
+                        int idx = 0;
+
                         foreach (var sO in sList)
                         {
-                            if (foreignKey.GetValue(rO).ToString() == key.GetValue(sO).ToString())
+                            if (info.IsArray())
                             {
-                                info.SetValue(rO, sO);
-                                break;
+                                key = info.PropertyType.GetArrayElementType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                          .Where(d => d.GetCustomAttribute<DBIgnoreAttribute>() == null)
+                                          .Where(d => d.GetCustomAttribute<DBForeignKeyAttribute>() != null && d.Name == $"{typeof(T).Name}Id")
+                                          .Where(d => d.PropertyType.IsValueType)
+                                          .FirstOrDefault();
+
+                                if (primaryKey.GetValue(rO).ToString() == key.GetValue(sO).ToString())
+                                {
+                                    if(info.PropertyType.GetElementType() != null)
+                                    {
+                                        Array arr = (Array)info.GetValue(rO);
+
+                                        if (arr == null)
+                                        {
+                                            arr = Array.CreateInstance(info.PropertyType.GetElementType(), sList.Count);
+                                            info.SetValue(rO, arr);
+                                        }
+
+                                        arr.SetValue(sO, idx);
+                                        idx++;
+
+                                    }
+                                    else
+                                    {
+                                        IList ilist = (IList)info.GetValue(rO);
+
+                                        if(ilist == null)
+                                        {
+                                            ilist = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(info.PropertyType.GetGenericArguments()[0]));
+                                            info.SetValue(rO, ilist);
+                                        }
+                                        ilist.Add(sO);
+                                    }                                    
+                                    
+                                }
+                            }
+                            else
+                            {
+
+                                if (foreignKey.GetValue(rO).ToString() == key.GetValue(sO).ToString())
+                                {
+                                    info.SetValue(rO, sO);
+                                    break;
+                                }
                             }
                         }
                     }
@@ -311,7 +372,12 @@ namespace MyORMForPostgreSQL.Objects
 
         private IList? _BuildEnumerable(Type type, DataSet dt)
         {
-            IList? list = Activator.CreateInstance(typeof(List<>).MakeGenericType(type)) as IList;
+
+            bool isArray = type.IsAssignableTo(typeof(IEnumerable)) && type != typeof(string);
+
+            Type arrType = isArray ? (type.GetElementType() ?? type.GetGenericArguments()[0]) : type;
+
+            IList? list = Activator.CreateInstance(typeof(List<>).MakeGenericType(arrType)) as IList;
 
             if (dt == null)
                 return list;
@@ -321,7 +387,9 @@ namespace MyORMForPostgreSQL.Objects
 
             foreach (DataRow row in dt.Tables[0].Rows)
             {
-                var it = Activator.CreateInstance(type);
+
+                var it = Activator.CreateInstance(arrType);
+
 
                 if (it == null)
                     continue;
@@ -523,7 +591,7 @@ namespace MyORMForPostgreSQL.Objects
             if (obj == null)
                 throw new global::MyORM.Exceptions.ArgumentNullException($"The param {typeof(T)} {nameof(obj)} is null");
 
-            _AddChildrenObjects(obj);
+            _AddOrUpdateChildrenObjects(obj); 
 
             StringBuilder sql = new StringBuilder();
 
@@ -642,7 +710,7 @@ namespace MyORMForPostgreSQL.Objects
                         bool isValueType = (!arrayType.IsClass) || arrayType == typeof(string);
 
                         if (!isValueType)
-                            continue;
+                            goto QUERY_OVER;
                     }
 
                     IEnumerable? v = c.GetValue(obj) as IEnumerable;
@@ -716,8 +784,13 @@ namespace MyORMForPostgreSQL.Objects
 
                 }
 
+                QUERY_OVER:
+
                 if (i == propertyInfos.Count - 1)
                 {
+                    if(sql[sql.Length - 2] == ',')
+                        sql.Remove(sql.Length - 2, 1);
+
                     sql.Append(" ) ");
                 }
                 else
@@ -748,17 +821,16 @@ namespace MyORMForPostgreSQL.Objects
                 {
                     propKey.SetValue(obj, _pGManager.ExecuteScalar<long>(sql.ToString()));
                 }
+
+                _AddOrUpdateChildrenObjects(obj);
             }
-
-
-
 
 
             return obj;
 
         }
 
-        private void _AddChildrenObjects(T obj)
+        private void _AddOrUpdateChildrenObjects(T obj)
         {
 
             List<PropertyInfo> propertyInfos = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -772,8 +844,24 @@ namespace MyORMForPostgreSQL.Objects
                 if (subItem.GetValue(obj) == null)
                     continue;
 
-                PropertyInfo propKey = subItem.PropertyType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+
+                bool isArray = subItem.PropertyType.IsAssignableTo(typeof(IEnumerable)) && subItem.PropertyType != typeof(string);
+
+                Type arrType = isArray ? (subItem.PropertyType.GetElementType() ?? subItem.PropertyType.GetGenericArguments()[0]) : null;
+
+                Type objType = arrType ?? subItem.PropertyType;
+
+
+                PropertyInfo propKey = objType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(u => u.GetCustomAttribute<DBPrimaryKeyAttribute>() != null)
+                .FirstOrDefault();
+
+                PropertyInfo superPropKey = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(u => u.GetCustomAttribute<DBPrimaryKeyAttribute>() != null)
+                .FirstOrDefault();
+
+                PropertyInfo objForeignKey = objType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(u => u.GetCustomAttribute<DBForeignKeyAttribute>() != null && u.Name == $"{typeof(T).Name}Id")
                 .FirstOrDefault();
 
                 if (propKey == null)
@@ -782,7 +870,7 @@ namespace MyORMForPostgreSQL.Objects
 
                 PropertyInfo set = _context.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                     .Where(d => d.PropertyType.GetInterfaces().Contains(typeof(IEntityCollection)))
-                    .Where(d => d.PropertyType.GenericTypeArguments.Contains(subItem.PropertyType)).FirstOrDefault();
+                    .Where(d => d.PropertyType.GenericTypeArguments.Contains(objType)).FirstOrDefault();
 
 
                 if (set == null)
@@ -790,33 +878,83 @@ namespace MyORMForPostgreSQL.Objects
 
                 string methodName = null;
 
-                try
+                int minTimes = 1;
+
+
+                IEnumerator enumerator = null;
+
+                if (isArray)
                 {
-                    methodName = Convert.ToInt64(propKey.GetValue(subItem.GetValue(obj)).ToString()) <= 0 ? "Add" : "Update";
+                    minTimes = 0;
 
+                    enumerator = (subItem.GetValue(obj) as IEnumerable).GetEnumerator();
+
+                    enumerator.Reset();
+
+                    while (enumerator.MoveNext())
+                    {
+                        minTimes++;
+                    }
+
+                    enumerator.Reset();
+
+                    enumerator.MoveNext();
                 }
-                catch(Exception ex)
+
+                for (int i = 0; i < minTimes; i++)
                 {
-                    throw new InvalidConstraintException($"Can not get key value from {subItem.PropertyType}.{propKey.Name} property");
+                    object objToSave = minTimes == 1 ? subItem.GetValue(obj) : null;
+
+                    if(isArray && minTimes >= 1)
+                    {    
+                        objToSave = enumerator.Current;
+
+                        if(!enumerator.MoveNext())
+                        {
+                            enumerator.Reset();
+                        }
+                    }
+
+                    try
+                    {
+                        methodName = Convert.ToInt64(propKey.GetValue(objToSave).ToString()) <= 0 ? "Add" : "Update";
+
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidConstraintException($"Can not get key value from {objType}.{propKey.Name} property");
+                    }
+
+                    if(methodName == "Update" && superPropKey != null && objForeignKey != null && objForeignKey.SetMethod != null)
+                    {
+                        if(superPropKey.PropertyType != objForeignKey.PropertyType)
+                            throw new InvalidConstraintException($"The type of foreign key {objType.Name}.{objForeignKey.Name} must be the same of {typeof(T).Name}.{superPropKey.Name}");
+
+                        objForeignKey.SetValue(objToSave, superPropKey.GetValue(obj));
+                    }
+
+                    MethodInfo? methodToInvoke = set.PropertyType.GetMethod(methodName, new Type[] { objType });
+
+                    if (methodToInvoke == null)
+                        continue;
+
+
+                    methodToInvoke.Invoke(set.GetValue(_context), new object[] { objToSave });
+
+                    if (!isArray)
+                    {
+                        PropertyInfo foreignKey = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                                    .Where(u => u.Name == $"{subItem.Name}Id")
+                                    .FirstOrDefault();
+
+                        if (foreignKey == null || foreignKey.SetMethod == null)
+                            continue;
+
+                        foreignKey.SetValue(obj, propKey.GetValue(subItem.GetValue(obj)));
+                    }
                 }
 
-                MethodInfo? methodToInvoke = set.PropertyType.GetMethod(methodName, new Type[] { subItem.PropertyType });
-
-                if (methodToInvoke == null)
-                    continue;
-
-
-                methodToInvoke.Invoke(set.GetValue(_context), new object[] { subItem.GetValue(obj) });
-
-
-                PropertyInfo foreignKey = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                            .Where(u => u.Name == $"{subItem.Name}Id")
-                            .FirstOrDefault();
-
-                if (foreignKey == null || foreignKey.SetMethod == null)
-                    continue;
-
-                foreignKey.SetValue(obj, propKey.GetValue(subItem.GetValue(obj)));
+               
 
             }
         }
@@ -1223,24 +1361,35 @@ namespace MyORMForPostgreSQL.Objects
 
             }
 
-            PropertyInfo? foreignKey = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .Where(d => d.GetCustomAttribute<DBIgnoreAttribute>() == null)
-                .Where(d => d.PropertyType.IsValueType)
-                .Where(d => d.Name == $"{member.Name}Id").FirstOrDefault();
+           
 
-            if (foreignKey == null)
-            {
-                throw new NoEntityMappedException($"No one foreign key was mapped for {member.PropertyType.Name}");
-            }
+            bool isArray = member.PropertyType.IsAssignableTo(typeof(IEnumerable)) && member.PropertyType != typeof(string);
 
+            Type arrType = isArray ? (member.PropertyType.GetElementType() ?? member.PropertyType.GetGenericArguments()[0]) : member.PropertyType;
 
-            string tableName = member.PropertyType.GetCustomAttribute<DBTableAttribute>()?.Name ?? member.PropertyType.Name.ToLower();
+            string tableName = arrType.GetCustomAttribute<DBTableAttribute>()?.Name ?? arrType.Name.ToLower();
 
-            PropertyInfo? key = member.PropertyType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            PropertyInfo? key = arrType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
                .Where(d => d.GetCustomAttribute<DBIgnoreAttribute>() == null)
                .Where(d => d.GetCustomAttribute<DBPrimaryKeyAttribute>() != null)
                .Where(d => d.PropertyType.IsValueType)
                .FirstOrDefault();
+
+            if(isArray)
+            {
+                key = arrType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+               .Where(d => d.GetCustomAttribute<DBIgnoreAttribute>() == null )
+               .Where(d => d.GetCustomAttribute<DBForeignKeyAttribute>() != null && d.Name == $"{typeof(T).Name}Id")
+               .Where(d => d.PropertyType.IsValueType)
+               .FirstOrDefault();
+            }
+
+
+            if (key == null)
+            {
+                throw new NoEntityMappedException($"No one foreign key was mapped for {member.PropertyType.Name}");
+            }
+
 
             string colName = key.GetCustomAttribute<DBColumnAttribute>()?.Name ?? key.Name.ToLower();
 
