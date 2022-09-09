@@ -120,6 +120,9 @@ namespace MyORMForPostgreSQL.Objects
         {
             PGCollection<T> result = new PGCollection<T>(_pGManager, _context);
 
+            if (_sql.Contains("ORDER BY"))
+                return this;
+
             MemberExpression? lambdaExpression = expression.Body as MemberExpression;
 
             if (lambdaExpression == null)
@@ -165,6 +168,9 @@ namespace MyORMForPostgreSQL.Objects
         {
             PGCollection<T> result = new PGCollection<T>(_pGManager, _context);
 
+            if (_sql.Contains("LIMIT"))
+                return this;
+
             _sql = $" {_sql} LIMIT {limit} ";
 
             result._sql = _sql;
@@ -180,6 +186,9 @@ namespace MyORMForPostgreSQL.Objects
         public IQueryableCollection<T> OffSet(int offSet)
         {
             PGCollection<T> result = new PGCollection<T>(_pGManager, _context);
+
+            if (_sql.Contains("OFFSET"))
+                return this;
 
             _sql = $" {_sql} OFFSET {offSet} ";
 
@@ -364,7 +373,7 @@ namespace MyORMForPostgreSQL.Objects
 
         public IEnumerable<T> Run(string sql)
         {
-            DataSet dt = _pGManager.GetDataSet(sql);
+            DataSet dt = _pGManager.GetDataSet(sql);            
 
             return _BuildEnumerable(typeof(T), dt) as IEnumerable<T> ?? new List<T>();
         }
@@ -591,7 +600,7 @@ namespace MyORMForPostgreSQL.Objects
             if (obj == null)
                 throw new global::MyORM.Exceptions.ArgumentNullException($"The param {typeof(T)} {nameof(obj)} is null");
 
-            _AddOrUpdateChildrenObjects(obj); 
+            _AddOrUpdateChildrenObjects(obj, false); 
 
             StringBuilder sql = new StringBuilder();
 
@@ -683,7 +692,7 @@ namespace MyORMForPostgreSQL.Objects
                 {
                     object? v = c.GetValue(obj);
 
-                    sql.Append(v == null ? "null" : $"{v?.ToString()?.Trim()}");
+                    sql.Append(v == null ? "null" : $"{v?.ToString()?.Replace(',','.').Trim()}");
                 }
 
                 if (c.PropertyType == typeof(DateTime))
@@ -700,6 +709,8 @@ namespace MyORMForPostgreSQL.Objects
                     }
                 }
 
+                bool ignoreValue = false;
+
                 if (isArray)
                 {
 
@@ -710,7 +721,10 @@ namespace MyORMForPostgreSQL.Objects
                         bool isValueType = (!arrayType.IsClass) || arrayType == typeof(string);
 
                         if (!isValueType)
+                        {
+                            ignoreValue = true;
                             goto QUERY_OVER;
+                        }
                     }
 
                     IEnumerable? v = c.GetValue(obj) as IEnumerable;
@@ -795,7 +809,8 @@ namespace MyORMForPostgreSQL.Objects
                 }
                 else
                 {
-                    sql.Append(" , ");
+                    if(!ignoreValue)
+                        sql.Append(" , ");
                 }
 
 
@@ -830,7 +845,7 @@ namespace MyORMForPostgreSQL.Objects
 
         }
 
-        private void _AddOrUpdateChildrenObjects(T obj)
+        private void _AddOrUpdateChildrenObjects(T obj, bool ignoreForeignKeyCheck = true)
         {
 
             List<PropertyInfo> propertyInfos = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
@@ -915,6 +930,22 @@ namespace MyORMForPostgreSQL.Objects
                         }
                     }
 
+                    if (!ignoreForeignKeyCheck)
+                    {                       
+
+                        
+                        if (superPropKey != null && objForeignKey != null)
+                        {
+                            var pkValue = superPropKey.GetValue(obj);
+                            var fkValue = objForeignKey.GetValue(objToSave);
+
+                            if ((long)pkValue == 0 || (long)fkValue == 0)
+                            {
+                                continue;
+                            }
+                        }
+                    }
+
                     try
                     {
                         methodName = Convert.ToInt64(propKey.GetValue(objToSave).ToString()) <= 0 ? "Add" : "Update";
@@ -925,7 +956,7 @@ namespace MyORMForPostgreSQL.Objects
                         throw new InvalidConstraintException($"Can not get key value from {objType}.{propKey.Name} property");
                     }
 
-                    if(methodName == "Update" && superPropKey != null && objForeignKey != null && objForeignKey.SetMethod != null)
+                    if(superPropKey != null && objForeignKey != null && objForeignKey.SetMethod != null)
                     {
                         if(superPropKey.PropertyType != objForeignKey.PropertyType)
                             throw new InvalidConstraintException($"The type of foreign key {objType.Name}.{objForeignKey.Name} must be the same of {typeof(T).Name}.{superPropKey.Name}");
@@ -969,6 +1000,8 @@ namespace MyORMForPostgreSQL.Objects
         {
             if (obj == null)
                 throw new global::MyORM.Exceptions.ArgumentNullException($"The param {typeof(T)} {nameof(obj)} is null");
+
+            _AddOrUpdateChildrenObjects(obj, false);
 
             StringBuilder sql = new StringBuilder();
 
@@ -1032,7 +1065,7 @@ namespace MyORMForPostgreSQL.Objects
                 {
                     object? v = c.GetValue(obj);
 
-                    sql.Append(v == null ? "null" : $"{v?.ToString()?.Trim()}");
+                    sql.Append(v == null ? "null" : $"{v?.ToString()?.Replace(',', '.').Trim()}");
                 }
 
 
@@ -1209,43 +1242,7 @@ namespace MyORMForPostgreSQL.Objects
                .ToList();
 
 
-            foreach(PropertyInfo subItem in childrenObjects)
-            {
-                if (subItem.GetValue(obj) == null)
-                    continue;
-
-                PropertyInfo propKey = subItem.PropertyType.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(d => d.GetCustomAttribute<DBIgnoreAttribute>() == null)
-                    .Where(d => d.GetCustomAttribute<DBPrimaryKeyAttribute>() != null).FirstOrDefault();
-
-                if (propKey == null)
-                    continue;
-
-                string methodName = null;
-
-                try
-                {
-                    methodName = Convert.ToInt64(propKey.GetValue(subItem.GetValue(obj)).ToString()) <= 0 ? "Add" : "Update";
-
-                }
-                catch (Exception ex)
-                {
-                    throw new InvalidConstraintException($"Can not get key value from {subItem.PropertyType}.{propKey.Name} property");
-                }                              
-
-
-                IEntityCollection collection = _context.Collection(subItem.PropertyType);
-
-                MethodInfo? set = collection.GetType().GetMethod(methodName, new Type[] { subItem.PropertyType });
-
-                if (set != null)
-                {
-                    set.Invoke(collection, new object[] { subItem.GetValue(obj) });
-                }
-
-            }
-
-            
+            _AddOrUpdateChildrenObjects(obj);
 
 
         }

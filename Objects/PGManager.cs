@@ -187,6 +187,10 @@ namespace MyORMForPostgreSQL.Objects
             {
                 ExecuteNonQuery($"CREATE DATABASE {PGConnectionBuilder.DataBase.ToLower().Trim()}", DB.POSTGRESQL);
             }
+
+            ExecuteNonQuery($"CREATE SCHEMA IF NOT EXISTS {PGConnectionBuilder.Schema.ToLower().Trim()}", DB.BUILDER);
+
+
         }
 
         public void CreateTable<T>()
@@ -231,6 +235,7 @@ namespace MyORMForPostgreSQL.Objects
         {
             if (DataBaseExists())
             {
+                ExecuteNonQuery($"SELECT PG_TERMINATE_BACKEND(PID) FROM PG_STAT_ACTIVITY WHERE DATNAME = '{PGConnectionBuilder.DataBase.ToLower().Trim()}' ", DB.POSTGRESQL);
                 ExecuteNonQuery($"DROP DATABASE {PGConnectionBuilder.DataBase.ToLower().Trim()}", DB.POSTGRESQL);
             }
         }
