@@ -1,14 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "pNDsZ+d2w3trwxnGMKNjbQCbmDxfBUhni5mMSogn35x66I+KzT1kK/4nEtIOrhmxAO6I+anNaM5WCl3h+QFI9g==",
+  "dgSpecHash": "4IL1ajOikMTuMPW8LEXqLlYBC4X6b8wJOrAjggh7IuYHTLExaLiJsgOTA6zEwOxWiZG9/7Ji7ff1he2p28G6PA==",
   "success": true,
   "projectFilePath": "C:\\Users\\LuisDev\\Desktop\\MyORM\\MyORM\\MyORMForPostgreSQL\\MyORMForPostgreSQL.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\LuisDev\\.nuget\\packages\\adr.myorm\\3.0.0\\adr.myorm.3.0.0.nupkg.sha512",
     "C:\\Users\\LuisDev\\.nuget\\packages\\npgsql\\6.0.3\\npgsql.6.0.3.nupkg.sha512",
-    "C:\\Users\\LuisDev\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
-    "C:\\Users\\LuisDev\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.4\\microsoft.netcore.app.ref.6.0.4.nupkg.sha512",
-    "C:\\Users\\LuisDev\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.4\\microsoft.windowsdesktop.app.ref.6.0.4.nupkg.sha512",
-    "C:\\Users\\LuisDev\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.4\\microsoft.aspnetcore.app.ref.6.0.4.nupkg.sha512"
+    "C:\\Users\\LuisDev\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512"
   ],
   "logs": []
 }

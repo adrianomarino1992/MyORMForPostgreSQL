@@ -13,11 +13,11 @@ using System.Reflection;
 
 [assembly: System.Reflection.AssemblyCompanyAttribute("MyORMForPostgreSQL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("2.0.1")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("3.0.0")]
 [assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
 [assembly: System.Reflection.AssemblyProductAttribute("MyORMForPostgreSQL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MyORMForPostgreSQL")]
-[assembly: System.Reflection.AssemblyVersionAttribute("2.0.1")]
+[assembly: System.Reflection.AssemblyVersionAttribute("3.0.0")]
 
 // Gerado pela classe WriteCodeFragment do MSBuild.
 

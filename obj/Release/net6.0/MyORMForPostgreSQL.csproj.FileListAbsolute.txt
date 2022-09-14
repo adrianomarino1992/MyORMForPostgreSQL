@@ -9,7 +9,4 @@ C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Release\net6.0\MyORM
 C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Release\net6.0\ref\MyORMForPostgreSQL.dll
 C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Release\net6.0\MyORMForPostgreSQL.pdb
 C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Release\net6.0\MyORMForPostgreSQL.csproj.AssemblyReference.cache
-C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\bin\Release\net6.0\MyORM.dll
-C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\bin\Release\net6.0\MyORM.pdb
-C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Release\net6.0\MyORMForPostgreSQL.csproj.CopyComplete
 C:\Users\LuisDev\Desktop\MyORM\MyORM\MyORMForPostgreSQL\obj\Release\net6.0\refint\MyORMForPostgreSQL.dll

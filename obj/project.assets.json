@@ -2,6 +2,15 @@
   "version": 3,
   "targets": {
     "net6.0": {
+      "Adr.MyORM/3.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/MyORM.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0/MyORM.dll": {}
+        }
+      },
       "Npgsql/6.0.3": {
         "type": "package",
         "dependencies": {
@@ -25,20 +34,25 @@
         "build": {
           "buildTransitive/netcoreapp3.1/_._": {}
         }
-      },
-      "MyORM/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v6.0",
-        "compile": {
-          "bin/placeholder/MyORM.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/MyORM.dll": {}
-        }
       }
     }
   },
   "libraries": {
+    "Adr.MyORM/3.0.0": {
+      "sha512": "4GB8wLsvcSs5xNNL/QpxZpAR6pi3Nxkwq3VOoaBr50xpmUOO9YWHOcqqSooq6etv73HVhm1AtpaTutio/BvLlA==",
+      "type": "package",
+      "path": "adr.myorm/3.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "adr.myorm.3.0.0.nupkg.sha512",
+        "adr.myorm.nuspec",
+        "lib/net6.0/MyORM.deps.json",
+        "lib/net6.0/MyORM.dll",
+        "lib/net6.0/MyORM.pdb"
+      ]
+    },
     "Npgsql/6.0.3": {
       "sha512": "yt/3XFRhHsJ01a4+qHM9+0mtitQ3DY2wJLyGP9vtvZa1cB1nSAw762GJGdSX3Bbc7wZKzeo4dc4drD3yvQe7gA==",
       "type": "package",
@@ -86,16 +100,11 @@
         "system.runtime.compilerservices.unsafe.nuspec",
         "useSharedDesignerContext.txt"
       ]
-    },
-    "MyORM/1.0.0": {
-      "type": "project",
-      "path": "../MyORM/MyORM.csproj",
-      "msbuildProject": "../MyORM/MyORM.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "MyORM >= 1.0.0",
+      "Adr.MyORM >= 3.0.0",
       "Npgsql >= 6.0.3"
     ]
   },
@@ -135,11 +144,7 @@
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
-          "projectReferences": {
-            "C:\\Users\\LuisDev\\Desktop\\MyORM\\MyORM\\MyORM\\MyORM.csproj": {
-              "projectPath": "C:\\Users\\LuisDev\\Desktop\\MyORM\\MyORM\\MyORM\\MyORM.csproj"
-            }
-          }
+          "projectReferences": {}
         }
       },
       "warningProperties": {
@@ -152,6 +157,10 @@
       "net6.0": {
         "targetAlias": "net6.0",
         "dependencies": {
+          "Adr.MyORM": {
+            "target": "Package",
+            "version": "[3.0.0, )"
+          },
           "Npgsql": {
             "target": "Package",
             "version": "[6.0.3, )"
@@ -167,26 +176,12 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[6.0.4, 6.0.4]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Ref",
-            "version": "[6.0.4, 6.0.4]"
-          },
-          {
-            "name": "Microsoft.WindowsDesktop.App.Ref",
-            "version": "[6.0.4, 6.0.4]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100-preview.4.22252.9\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.300\\RuntimeIdentifierGraph.json"
       }
     }
   }

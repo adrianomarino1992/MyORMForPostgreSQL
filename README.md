@@ -8,19 +8,19 @@ MyORMForPostgreSQL is a implementation of MyORM that uses PostgreSQL as database
 .NET CLI
 
 ```bash
-dotnet add package Adr.MyORMForPostgreSQL --version 2.0.1
+dotnet add package Adr.MyORMForPostgreSQL --version 3.0.0
 ```
 
 Nuget package manager
 
 ```bash
-PM> Install-Package Adr.MyORMForPostgreSQL -Version 2.0.1
+PM> Install-Package Adr.MyORMForPostgreSQL -Version 3.0.0
 ```
 
 packageReference
 
 ```bash
-<PackageReference Include="Adr.MyORMForPostgreSQL" Version="2.0.1" />
+<PackageReference Include="Adr.MyORMForPostgreSQL" Version="3.0.0" />
 ```
 
 ## Usage

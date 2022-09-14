@@ -2,6 +2,15 @@
   "version": 3,
   "targets": {
     "net6.0": {
+      "Adr.MyORM/3.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/MyORM.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0/MyORM.dll": {}
+        }
+      },
       "coverlet.collector/3.1.2": {
         "type": "package",
         "build": {
@@ -1695,21 +1704,11 @@
           "build/netcoreapp2.1/xunit.runner.visualstudio.props": {}
         }
       },
-      "MyORM/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v6.0",
-        "compile": {
-          "bin/placeholder/MyORM.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/MyORM.dll": {}
-        }
-      },
       "MyORMForPostgreSQL/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v6.0",
         "dependencies": {
-          "MyORM": "1.0.0",
+          "Adr.MyORM": "3.0.0",
           "Npgsql": "6.0.3"
         },
         "compile": {
@@ -1722,6 +1721,21 @@
     }
   },
   "libraries": {
+    "Adr.MyORM/3.0.0": {
+      "sha512": "4GB8wLsvcSs5xNNL/QpxZpAR6pi3Nxkwq3VOoaBr50xpmUOO9YWHOcqqSooq6etv73HVhm1AtpaTutio/BvLlA==",
+      "type": "package",
+      "path": "adr.myorm/3.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "adr.myorm.3.0.0.nupkg.sha512",
+        "adr.myorm.nuspec",
+        "lib/net6.0/MyORM.deps.json",
+        "lib/net6.0/MyORM.dll",
+        "lib/net6.0/MyORM.pdb"
+      ]
+    },
     "coverlet.collector/3.1.2": {
       "sha512": "wuLDIDKD5XMt0A7lE31JPenT7QQwZPFkP5rRpdJeblyXZ9MGLI8rYjvm5fvAKln+2/X+4IxxQDxBtwdrqKNLZw==",
       "type": "package",
@@ -6063,11 +6077,6 @@
         "xunit.runner.visualstudio.nuspec"
       ]
     },
-    "MyORM/1.0.0": {
-      "type": "project",
-      "path": "../../../MyORM/MyORM.csproj",
-      "msbuildProject": "../../../MyORM/MyORM.csproj"
-    },
     "MyORMForPostgreSQL/1.0.0": {
       "type": "project",
       "path": "../../MyORMForPostgreSQL.csproj",
@@ -6172,26 +6181,12 @@
         ],
         "assetTargetFallback": true,
         "warn": true,
-        "downloadDependencies": [
-          {
-            "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[6.0.4, 6.0.4]"
-          },
-          {
-            "name": "Microsoft.NETCore.App.Ref",
-            "version": "[6.0.4, 6.0.4]"
-          },
-          {
-            "name": "Microsoft.WindowsDesktop.App.Ref",
-            "version": "[6.0.4, 6.0.4]"
-          }
-        ],
         "frameworkReferences": {
           "Microsoft.NETCore.App": {
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.100-preview.4.22252.9\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.300\\RuntimeIdentifierGraph.json"
       }
     }
   }
